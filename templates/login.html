@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}Team access — AFTR{% endblock %}
+{% block content %}
+<section class="login-wrap"><div class="login-visual"><img src="{{ url_for('static', filename='images/live-event.jpg') }}" alt="Live event stage"><div class="login-visual-copy"><span class="eyebrow">BEHIND THE MOMENT</span><h1>Good shows<br>need good <em>people.</em></h1></div></div>
+  <div class="login-panel"><div class="eyebrow eyebrow-dark">TEAM ACCESS</div><h2>Welcome <em>back.</em></h2><p>Sign in to publish events or validate tickets at the gate.</p><form method="post" class="stack-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label for="email">Work email</label><input id="email" name="email" type="email" required autocomplete="username" placeholder="name@example.com"><label for="password">Password</label><input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Your password"><button class="button button-primary button-full" type="submit">Sign in <span>→</span></button></form><div class="login-hint">Demo accounts and passwords are in the project README.</div></div>
+</section>
+{% endblock %}

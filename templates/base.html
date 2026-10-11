@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="theme-color" content="#101311">
+  <title>{% block title %}AFTR — Find your next live moment{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="{{ url_for('index') }}" aria-label="AFTR home"><span class="brand-mark">A</span><span>AFTR<span class="brand-dot">.</span></span></a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="{{ url_for('index') }}">Discover</a>
+      {% if session.get('role') == 'admin' %}<a href="{{ url_for('admin') }}">Organizer</a>{% endif %}
+      {% if session.get('role') in ['admin', 'gate'] %}<a href="{{ url_for('gate') }}">Gate scan</a>{% endif %}
+    </nav>
+    <div class="header-actions">
+      {% if session.get('user_id') %}
+        <span class="user-chip">{{ session.get('email') }}</span>
+        <form action="{{ url_for('logout') }}" method="post" class="inline-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button button-quiet button-small" type="submit">Sign out</button></form>
+      {% else %}<a class="button button-quiet button-small" href="{{ url_for('login') }}">Organizer login</a>{% endif %}
+    </div>
+  </header>
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}<section class="flash-stack" aria-live="polite">{% for category, message in messages %}<div class="flash flash-{{ category }}">{{ message }}</div>{% endfor %}</section>{% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer"><div class="footer-brand">AFTR<span class="brand-dot">.</span></div><p>Make the night yours. Your ticket, your moment.</p><span>DEMO PLATFORM · QR CHECK-IN READY</span></footer>
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

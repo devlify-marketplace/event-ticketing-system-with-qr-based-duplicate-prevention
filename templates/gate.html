@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Gate check-in — AFTR{% endblock %}
+{% block content %}
+<section class="gate-page section-wrap"><div class="gate-intro"><div class="eyebrow eyebrow-dark"><span class="live-dot"></span> GATE OPERATIONS</div><h1>Let the right<br>people <em>in.</em></h1><p>Each ticket can enter once. A successful scan is recorded immediately; repeat scans are blocked.</p></div>
+  <div class="scanner-card"><div class="scanner-top"><div><div class="eyebrow eyebrow-dark">CHECK-IN CONSOLE</div><h2>Scan a <em>ticket.</em></h2></div><span class="scanner-live"><span class="live-dot"></span> SYSTEM READY</span></div>
+    {% if events %}<label for="event_id">Select event</label><select id="event_id">{% for event in events %}<option value="{{ event.id }}">{{ event.title }} · {{ event.city }} · {{ event.starts_at.replace('T',' ') }}</option>{% endfor %}</select>
+      <div class="camera-wrap" id="camera-wrap" hidden><video id="camera" playsinline muted></video><div class="camera-frame"></div></div>
+      <div class="scanner-controls"><button class="button button-outline" id="camera-toggle" type="button">Use camera</button><span class="scan-or">OR</span><span class="keyboard-note">Use a QR reader as a keyboard</span></div>
+      <form id="scan-form" class="scan-form"><label for="ticket-token">Ticket code</label><div class="scan-input-row"><input id="ticket-token" name="ticket" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Click here, then scan or paste a QR code" required><button class="button button-primary" type="submit">Validate <span>→</span></button></div></form>
+      <div id="scan-result" class="scan-result" aria-live="assertive" hidden></div><p class="scanner-footnote">Green = new valid ticket · Amber = duplicate · Red = invalid or wrong event. Every attempt is auditable.</p>
+    {% else %}<div class="empty-state"><h3>No published events to scan.</h3><p>Ask the organizer to publish an event first.</p></div>{% endif %}
+  </div>
+</section>
+{% endblock %}

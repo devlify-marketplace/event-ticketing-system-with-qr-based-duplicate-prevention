@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}AFTR — Find your next live moment{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-image" aria-hidden="true"></div><div class="hero-shade"></div>
+  <div class="hero-copy">
+    <div class="eyebrow"><span class="live-dot"></span> YOUR CITY. YOUR PEOPLE. YOUR NIGHT.</div>
+    <h1>Good nights<br>stay with you<span class="brand-dot">.</span></h1>
+    <p>Find the live moments worth leaving home for. Book in a few taps, then scan straight in.</p>
+    <a href="#events" class="button button-primary">Explore events <span aria-hidden="true">↘</span></a>
+  </div>
+  <div class="hero-caption"><span>01 / LIVE EXPERIENCES</span><span>BUILT FOR THE MOMENT</span></div>
+</section>
+<section class="section-wrap event-section" id="events">
+  <div class="section-heading"><div><div class="eyebrow eyebrow-dark">THE GOOD STUFF</div><h2>Find your next <em>thing.</em></h2></div><span class="result-count">{{ events|length }} event{{ 's' if events|length != 1 else '' }} to explore</span></div>
+  {% if events %}
+  <div class="event-grid">
+    {% for event in events %}
+    <article class="event-card">
+      <a class="event-art" href="{{ url_for('event_detail', event_id=event.id) }}" aria-label="View {{ event.title }}">
+        <img src="{{ url_for('static', filename='images/live-event.jpg') }}" alt="Concert crowd under stage lights" loading="lazy">
+        <span class="art-label">LIVE · {{ event.city|upper }}</span><span class="art-arrow">↗</span>
+      </a>
+      <div class="event-card-body"><div class="card-date">{{ event.starts_at.replace('T', ' · ') }}</div><h3><a href="{{ url_for('event_detail', event_id=event.id) }}">{{ event.title }}</a></h3><p class="card-venue">{{ event.venue }} · {{ event.city }}</p>
+        <div class="card-bottom"><span class="card-price">{{ event.price|money(event.currency) }} <small>/ ticket</small></span><span class="availability">{{ [event.capacity - event.sold, 0]|max }} left</span></div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}<div class="empty-state"><span class="empty-icon">✳</span><h3>Something good is on the way.</h3><p>There are no upcoming events just yet. Check back soon.</p></div>{% endif %}
+</section>
+<section class="manifesto"><span class="eyebrow">LESS SCROLLING. MORE LIVING.</span><p>From checkout to the <em>front row</em> in a few taps.</p><span class="manifesto-note">Every ticket comes with its own secure, one-time QR code.</span></section>
+{% endblock %}

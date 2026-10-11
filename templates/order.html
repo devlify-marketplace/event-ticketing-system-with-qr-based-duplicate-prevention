@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Your tickets — AFTR{% endblock %}
+{% block content %}
+<section class="order-head section-wrap"><div class="success-mark">✓</div><div class="eyebrow eyebrow-dark">YOU'RE ON THE LIST</div><h1>Your night is <em>locked in.</em></h1><p>Order <strong>{{ order.reference }}</strong> · {{ order.buyer_name }} · {{ order.buyer_email }}</p><div class="demo-banner"><strong>Demo order confirmed.</strong> No real payment was taken. Save or print this private page to keep your ticket QR codes handy.</div><button class="button button-outline screen-only" type="button" onclick="window.print()">Print tickets</button></section>
+<section class="ticket-list section-wrap">
+  {% for ticket in tickets %}
+  <article class="ticket-pass">
+    <div class="ticket-pass-main"><div class="pass-top"><span class="eyebrow eyebrow-dark">AFTR · ADMIT ONE</span><span class="ticket-status status-{{ ticket.status }}">{{ ticket.status }}</span></div>
+      <h2>{{ event.title }}</h2><p class="pass-attendee">{{ ticket.attendee_name }}</p><div class="pass-meta"><div><span>DATE & TIME</span><strong>{{ ticket.starts_at.replace('T', ' · ') }}</strong></div><div><span>WHERE</span><strong>{{ ticket.venue }}, {{ ticket.city }}</strong></div></div>
+      <div class="pass-id">TICKET ID <strong>{{ ticket.public_id[:10]|upper }}</strong> <span>·</span> ORDER {{ order.reference }}</div>
+    </div>
+    <div class="ticket-pass-qr"><img src="{{ ticket.qr }}" alt="QR code for ticket {{ loop.index }}"><span>SCAN TO ENTER</span></div>
+  </article>
+  {% endfor %}
+</section>
+<div class="order-foot section-wrap"><span>Private order link: keep this page and QR code to yourself.</span><a href="{{ url_for('index') }}">Discover more events →</a></div>
+{% endblock %}

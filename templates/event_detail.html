@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}{{ event.title }} — AFTR{% endblock %}
+{% block content %}
+<section class="detail-hero">
+  <img src="{{ url_for('static', filename='images/live-event.jpg') }}" alt="Audience at a live music event">
+  <div class="detail-hero-shade"></div><div class="detail-hero-copy"><a class="back-link" href="{{ url_for('index') }}">← All events</a><span class="eyebrow"><span class="live-dot"></span> LIVE IN {{ event.city|upper }}</span><h1>{{ event.title }}</h1><p class="detail-place">{{ event.venue }} <span>·</span> {{ event.city }}</p></div>
+</section>
+<section class="detail-layout section-wrap">
+  <div class="detail-description"><div class="eyebrow eyebrow-dark">THE EXPERIENCE</div><h2>Be there when<br><em>it happens.</em></h2><p>{{ event.description }}</p><div class="event-facts"><div><span>DATE & TIME</span><strong>{{ event.starts_at.replace('T', ' · ') }}</strong></div><div><span>VENUE</span><strong>{{ event.venue }}, {{ event.city }}</strong></div><div><span>CAPACITY</span><strong>{{ remaining }} tickets available</strong></div></div></div>
+  <aside class="checkout-card"><div class="checkout-top"><span class="eyebrow eyebrow-dark">YOUR NIGHT STARTS HERE</span><div class="checkout-price">{{ event.price|money(event.currency) }}<span> / ticket</span></div></div>
+    {% if remaining > 0 %}
+    <form method="post" action="{{ url_for('checkout', event_id=event.id) }}" class="stack-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="buyer_name">Full name</label><input id="buyer_name" name="buyer_name" autocomplete="name" required maxlength="120" placeholder="The name on your ticket">
+      <label for="buyer_email">Email address</label><input id="buyer_email" name="buyer_email" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com">
+      <label for="quantity">Number of tickets</label><select id="quantity" name="quantity">{% for n in range(1, [8, remaining]|min + 1) %}<option value="{{ n }}">{{ n }} ticket{{ 's' if n != 1 else '' }}</option>{% endfor %}</select>
+      <div class="demo-notice"><span>ⓘ</span><span><strong>Demo checkout</strong><br>No card details are collected and no real payment is charged.</span></div>
+      <button class="button button-primary button-full" type="submit">Get tickets <span aria-hidden="true">→</span></button>
+    </form>
+    {% else %}<div class="sold-out"><strong>All tickets are gone.</strong><p>We hope to see you at the next one.</p></div>{% endif %}
+    <p class="secure-note">✦ Unique QR ticket · one-time gate entry</p>
+  </aside>
+</section>
+{% endblock %}
