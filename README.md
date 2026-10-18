@@ -2,6 +2,12 @@
 
 A runnable event-ticketing web app: organizers publish events, guests complete an explicitly simulated checkout and receive unique QR tickets, and authenticated gate staff validate each ticket once. A repeat scan is recorded and rejected.
 
+## Devlify
+
+An academic project in the [Devlify GitHub collection](https://github.com/devlify-marketplace).
+
+[Visit Devlify](https://devlify.com.ng) · [Browse the marketplace](https://devlify.com.ng/marketplace)
+
 ## Requirements
 
 - Python 3.10+
