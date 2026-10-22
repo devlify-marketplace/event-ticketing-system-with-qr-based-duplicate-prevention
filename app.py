@@ -427,12 +427,17 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
     @app.post("/api/gate/validate")
     @login_required("admin", "gate")
     def validate_ticket():
-        payload = request.get_json(silent=True) or {}
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify(ok=False, outcome="invalid_request", message="Send a JSON object with a ticket and event ID."), 400
         token = str(payload.get("ticket", "")).strip()[:256]
         try:
             event_id = int(payload.get("event_id", 0))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             event_id = 0
+        # SQLite INTEGER parameters must fit in a signed 64-bit value.
+        if not 1 <= event_id <= 2**63 - 1:
+            return jsonify(ok=False, outcome="invalid_event", message="Choose a valid event before scanning."), 400
         db = g.db
         db.execute("BEGIN IMMEDIATE")
         try:

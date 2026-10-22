@@ -138,6 +138,47 @@ def test_first_scan_is_accepted_and_second_scan_is_rejected_and_logged(system):
     assert outcomes == ["accepted", "duplicate"]
 
 
+@pytest.mark.parametrize("payload", [["bad"], "bad", 7, True, None, []])
+def test_gate_validate_rejects_non_object_json(system, payload):
+    app, db_path = system
+    client = app.test_client()
+    sign_in_as(client, db_path)
+    response = client.post(
+        "/api/gate/validate",
+        json=payload,
+        headers={"X-CSRF-Token": csrf(client)},
+    )
+    assert response.status_code == 400
+    body = response.get_json()
+    assert body["ok"] is False
+    assert body["outcome"] == "invalid_request"
+    assert body["message"]
+    connection = sqlite3.connect(db_path)
+    count = connection.execute("SELECT COUNT(*) FROM checkin_log").fetchone()[0]
+    connection.close()
+    assert count == 0
+
+
+@pytest.mark.parametrize("event_id", [10**100, 1e100, str(10**100)])
+def test_gate_validate_rejects_out_of_range_event_id(system, event_id):
+    app, db_path = system
+    client = app.test_client()
+    sign_in_as(client, db_path)
+    issue_order(client)
+    public_id = load_ticket_id(db_path)
+    response = validate(client, token_for(app, public_id), event_id=event_id)
+    assert response.status_code == 400
+    body = response.get_json()
+    assert body["ok"] is False
+    assert body["outcome"] == "invalid_event"
+    connection = sqlite3.connect(db_path)
+    checkins = connection.execute("SELECT COUNT(*) FROM checkin_log").fetchone()[0]
+    status = connection.execute("SELECT status FROM tickets").fetchone()[0]
+    connection.close()
+    assert checkins == 0
+    assert status == "valid"
+
+
 def test_invalid_signature_and_wrong_event_are_never_accepted(system):
     app, db_path = system
     client = app.test_client()
