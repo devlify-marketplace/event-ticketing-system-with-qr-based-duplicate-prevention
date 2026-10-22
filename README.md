@@ -64,7 +64,7 @@ python3 -m pip install -r requirements.txt pytest
 python3 -m pytest -q
 ```
 
-Automated tests use a temporary SQLite database and cover public discovery, completed demo checkout, per-ticket QR output, protected order links, capacity enforcement, invalid tokens, wrong-event validation, successful/duplicate scans, and concurrent repeated scans.
+Automated tests use a temporary SQLite database and cover public discovery, completed demo checkout, per-ticket QR output, protected order links, capacity enforcement (including two simultaneous buyers competing for the last ticket), invalid tokens, wrong-event validation, successful/duplicate scans, and concurrent repeated scans.
 
 Health probe: `GET /health` returns JSON for a simple local readiness check.
 

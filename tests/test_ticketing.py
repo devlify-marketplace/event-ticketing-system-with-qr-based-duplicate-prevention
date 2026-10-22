@@ -177,6 +177,65 @@ def test_capacity_is_enforced_before_order_commit(system):
     assert count == 0
 
 
+def test_two_simultaneous_checkouts_only_sell_the_last_ticket_once(system):
+    app, db_path = system
+    connection = sqlite3.connect(db_path)
+    connection.execute("UPDATE events SET capacity=1 WHERE id=1")
+    connection.commit()
+    connection.close()
+    barrier = threading.Barrier(2)
+
+    def buyer_request(buyer_number):
+        # Each buyer has an independent session and a real, session-bound CSRF token.
+        client = app.test_client()
+        assert client.get("/events/1").status_code == 200
+        csrf_token = csrf(client)
+        assert csrf_token
+        name = f"Buyer {buyer_number}"
+        email = f"buyer{buyer_number}@example.com"
+        barrier.wait(timeout=3)
+        response = client.post(
+            "/events/1/checkout",
+            data={
+                "csrf_token": csrf_token,
+                "buyer_name": name,
+                "buyer_email": email,
+                "quantity": "1",
+            },
+            follow_redirects=False,
+        )
+        assert response.status_code == 302
+        location = response.headers["Location"]
+        page = client.get(location)
+        assert page.status_code == 200
+        return name, email, location, page.data
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(buyer_request, range(2)))
+
+    winners = [result for result in results if result[2].startswith("/orders/EVT-")]
+    losers = [result for result in results if result[2] == "/events/1"]
+    assert len(winners) == 1
+    assert len(losers) == 1
+    name, email, _location, order_page = winners[0]
+    assert b"Demo order confirmed" in order_page
+    assert name.encode() in order_page
+    assert b"There are not enough tickets left for that quantity." in losers[0][3]
+
+    connection = sqlite3.connect(db_path)
+    try:
+        assert connection.execute("SELECT COUNT(*) FROM orders").fetchone()[0] == 1
+        assert connection.execute("SELECT COUNT(*) FROM tickets").fetchone()[0] == 1
+        ticket = connection.execute(
+            """SELECT o.buyer_name, o.buyer_email, o.status,
+                      t.event_id, t.attendee_name, t.status
+               FROM tickets t JOIN orders o ON o.id=t.order_id"""
+        ).fetchone()
+    finally:
+        connection.close()
+    assert ticket == (name, email, "demo_paid", 1, name, "valid")
+
+
 def test_gate_and_admin_pages_require_staff_roles(system):
     app, db_path = system
     client = app.test_client()
